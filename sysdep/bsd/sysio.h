@@ -225,7 +225,12 @@ sk_set_md5_auth_int(sock *s, sockaddr *sa, char *passwd)
 	}
     }
 
+#ifdef __MACH__
+  int rv = -1;
+  errno = ENOPROTOOPT;
+#else
   int rv = setsockopt(s->fd, IPPROTO_TCP, TCP_MD5SIG, &enable, sizeof(enable));
+#endif
 
   if (rv < 0) 
     {

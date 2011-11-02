@@ -460,8 +460,15 @@ krt_read_ifinfo(struct ks_msg *msg)
 
   if (fl & IFF_UP)
     f.flags |= IF_ADMIN_UP;
+#ifdef __MACH__
+  /* The right answer can be dug up from ifmediareq struct */
+  /* ioctl(s, SIOCGIFMEDIA, &ifr); */
+  /* ...If only we had the socket */
+  f.flags |= IF_LINK_UP;            /* unknown */
+#else
   if (ifm->ifm_data.ifi_link_state != LINK_STATE_DOWN)
     f.flags |= IF_LINK_UP;          /* up or unknown */
+#endif
   if (fl & IFF_LOOPBACK)            /* Loopback */
     f.flags |= IF_MULTIACCESS | IF_LOOPBACK | IF_IGNORE;
   else if (fl & IFF_POINTOPOINT)    /* PtP */

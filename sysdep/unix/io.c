@@ -25,6 +25,10 @@
 #include <netinet/in.h>
 #include <netinet/icmp6.h>
 
+#ifdef __MACH__
+#include <mach/mach_time.h>
+#endif
+
 #include "nest/bird.h"
 #include "lib/lists.h"
 #include "lib/resource.h"
@@ -143,9 +147,24 @@ update_times_gettime(void)
   struct timespec ts;
   int rv;
 
+#ifdef __MACH__
+  mach_timebase_info_data_t info;
+  uint64_t mach_time;
+
+  mach_time = mach_absolute_time();
+  rv = mach_timebase_info(&info);
+  if (rv != 0)
+	  die("mach_timebase_info: %m");
+
+  mach_time *= info.numer;
+  mach_time /= info.denom;
+  ts.tv_sec = mach_time;
+
+#else
   rv = clock_gettime(CLOCK_MONOTONIC, &ts);
   if (rv != 0)
     die("clock_gettime: %m");
+#endif
 
   if (ts.tv_sec != now) {
     if (ts.tv_sec < now)
@@ -170,8 +189,13 @@ update_times(void)
 static inline void
 init_times(void)
 {
+#ifdef __MACH__
+ mach_timebase_info_data_t info;
+ clock_monotonic_available = (mach_timebase_info(&info) == 0);
+#else
  struct timespec ts;
  clock_monotonic_available = (clock_gettime(CLOCK_MONOTONIC, &ts) == 0);
+#endif
  if (!clock_monotonic_available)
    log(L_WARN "Monotonic timer is missing");
 }
