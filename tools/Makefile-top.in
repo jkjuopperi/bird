@@ -1,6 +1,9 @@
 # Makefile for in place build of BIRD
 # (c) 1999--2000 Martin Mares <mj@ucw.cz>
 
+.PHONY: all depend tags install install-docs \
+	docs userdocs progdocs clean distclean
+
 objdir=@objdir@
 
 all depend tags install install-docs:
