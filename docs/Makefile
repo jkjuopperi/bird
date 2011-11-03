@@ -1,5 +1,5 @@
 root-rel=../
-dir-name=doc
+dir-name=docs
 
 ifneq ($(wildcard ../Rules),)
 include ../Rules
